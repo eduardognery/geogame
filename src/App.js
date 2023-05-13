@@ -133,7 +133,7 @@ const App = () => {
                 ? <p>Foi perto! 👍</p>
                 : (distance < 1)
                   ? <p>Quase. 🤔</p>
-                  : <p>smh</p>
+                  : <p>Se passou 🤦‍♀️</p>
             }
             <button onClick={() => {
               setCurrentCity(cities[Math.floor(Math.random() * cities.length)]);
