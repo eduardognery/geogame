@@ -32,6 +32,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -40,4 +41,37 @@
 .App {
   font-family: sans-serif;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between
+}
+
+.Main {
+  align-self: "auto"
+}
+
+footer {
+    font-size: small;
+    align-self: stretch
+}
+
+html,
+body,
+#root,
+.App {
+  height: 100%
+}
+
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
