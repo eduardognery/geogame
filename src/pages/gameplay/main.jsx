@@ -1,181 +1,128 @@
 import React, { useEffect, useState } from 'react';
 
-import regions from '../../data/regions';
+import PreLevel from './preLevel';
+import PlayLevel from './playLevel';
+import PosLevel from './posLevel';
+import StateSelection from './stateSelection';
+import Spinner from '../../components/spinner';
+
+// import regions from '../../data/regions';
 import states from '../../data/states';
 import allCities from '../../data/cities';
+import LevelHead from '../../components/levelHead';
+import EndGame from './end';
 
-import MapViewer from './mapViewer';
-
-const sul = regions[4];
-
-const size = [350, 350];
-const center = [sul.latitude, sul.longitude];
-const zoom = 5;
-
-const GamePlay = ({setPage}) => {
-  /** Fases (rounds):
-   *    1- Capitais (level 1)
-   *    2- Maiores cidades (level 2)
+const GamePlay = ({ setPage }) => {
+  /** Fases (gameLevel):
+   *    1- Capitais (cityLevel 1, currentState = null)
+   *    2- Maiores cidades (cityLevel 2, currentState = null)
    *    Seleção de estado p/ fase 3
-   *    3- Maiores cidades do estado (level 3)
+   *    3- Maiores cidades do estado (cityLevel 3, currentState not null)
    *    Seleção de estado p/ fase 4
-   *    4- Maiores cidades do estado (level 3)
+   *    4- Maiores cidades do estado (cityLevel 3, currentState not null)
    *    Seleção de estado p/ fase 5
-   *    5- Maiores cidades do estado (level 3)
+   *    5- Maiores cidades do estado (cityLevel 3, currentState not null)
    *    Seleção de estado p/ fase 6
-   *    6- Maiores cidades do estado (level 4)
+   *    6- Maiores cidades do estado (cityLevel 4, currentState not null)
    *    Seleção de estado p/ fase 7
-   *    7- Maiores cidades do estado (level 4)
+   *    7- Maiores cidades do estado (cityLevel 4, currentState not null)
    *    Seleção de estado p/ fase 8
-   *    8- Maiores cidades do estado (level 4)
+   *    8- Maiores cidades do estado (cityLevel 4, currentState not null)
    */
-  const [round, setRound] = useState(1);
-  const [currentState, setCurrentState] = useState(0);
-  const [stateSelect, setStateSelect] = useState(false);
-  const [citiesList, setCitiesList] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [currentCity, setCurrentCity] = useState(null);
-  const [userPosition, setUserPosition] = useState(null);
-  const [points, setPoints] = useState(0);
-  const [roundPoints, setRoundPoints] = useState(0);
-  const [totalPoints, setTotalPoints] = useState(0);
-  const [nextStates, setNextStates] = useState(states);
+  const [gameLevel, setGameLevel] = useState(1);
+  const [cityLevel, setCityLevel] = useState(1);
+
+  /** Mostra (screen):
+   *    "preLevel": antes de iniciar a fase (o que será pedido)
+   *    "stateLevel": seleção de estado para fases 3-8
+   *    "playLevel": jogo rodando
+   *    "posLevel": após finalizar a fase (pontuação)
+   */
+  const [screen, setScreen] = useState("preLevel");
+
+  /** array de cidades da fase */
+  const [cities, setCities] = useState([]);
+  /** id do estado da fase */
+  const [currentState, setCurrentState] = useState(null);
+  /** estado de carregamento de cidades da fase */
   const [loading, setLoading] = useState(true);
+  /** estados que podem ser selecionados na tela "stateLevel" */
+  const [nextStates, setNextStates] = useState(states);
+
+  /** levelPoints: pontos na fase (soma dos pontos de todas as rodadas)
+   * totalPoints: pontuação total do jogo (soma dos pontos de todas as fases) */
+  const [levelPoints, setLevelPoints] = useState(0);
+  const [totalPoints, setTotalPoints] = useState(0);
 
   useEffect(() => {
     if (loading) {
-      let level = round <= 2
-        ? round
-        : round <= 5
-          ? 3
-          : round <= 8
-            ? 4
-            : 1;
-
-      let newRoundCities = !currentState
+      setCities(currentState
         ? allCities
-          .filter(city => city.level === level)
+          .filter(city => city.level === cityLevel && city.stateId === currentState.id)
           .sort(() => Math.random() - 0.5)
           .slice(0, 3)
         : allCities
-          .filter(city => city.level === level && city.stateId === currentState)
+          .filter(city => city.level === cityLevel)
           .sort(() => Math.random() - 0.5)
-          .slice(0, 3);
-      
-      setCitiesList(newRoundCities);
-      setCurrentCity(newRoundCities[0]);
-      setCurrentIndex(0);
-      setUserPosition(null);
-
-      if (!nextStates.length) {
-        setNextStates(states);
-      }
-
+          .slice(0, 3)
+      );
       setLoading(false);
     }
-
-  }, [round, currentState, loading, nextStates]);
-
-  function handleMapClick(e) {
-    if (!userPosition) {
-      setUserPosition(e.latlng);
-      let dist = Math.sqrt(Math.pow((currentCity.latitude - e.latlng.lat), 2) + Math.pow((currentCity.longitude - e.latlng.lng), 2));
-
-      let pointsToAdd = (dist < 0.5)
-        ? 10
-        : (dist < 1.5)
-        ? 5
-        : (dist < 3)
-        ? 1
-        : 0;
-      
-      setPoints(pointsToAdd);
-      setRoundPoints(roundPoints + pointsToAdd);
-      setTotalPoints(totalPoints + pointsToAdd);
-    }
-  }
+  }, [loading, cityLevel, currentState]);
 
   return <>
-    <h4>Fase {round}</h4>
-
-    <p>Pontuação nesta fase: {roundPoints}</p>
+    {(screen !== "endGame")
+      ? <LevelHead level={gameLevel} points={levelPoints} screen={screen} />
+      : null
+    }
+    
 
     {(loading)
-      ? <div style={{
-        display: "flex",
-        justifyContent: "center"
-      }}>
-        <div className="loader"></div>
-      </div>
-      : <>
-        {(!stateSelect)
-          ? <>
-            <p>Rodada {currentIndex + 1} de {citiesList.length}: Clique em {currentCity.name}</p>
-            <MapViewer
-              center={center}
-              size={size}
-              zoom={zoom}
-              cityPos={[currentCity.latitude, currentCity.longitude]}
-              userPos={userPosition}
-              handleMapClick={handleMapClick}
+      ? <Spinner />
+      : (screen === "preLevel")
+        ? <PreLevel
+          level={gameLevel}
+          setScreen={setScreen}
+          setLoading={setLoading}
+        />
+        : (screen === "stateLevel")
+          ? <StateSelection
+            states={states}
+            nextStates={nextStates}
+            setNextStates={setNextStates}
+            setCurrentState={setCurrentState}
+            setScreen={setScreen}
+            setLoading={setLoading}
+          />
+          : (screen === "playLevel")
+            ? <PlayLevel
+              loading={loading}
+              cities={cities}
+              setScreen={setScreen}
+              levelPoints={levelPoints}
+              setLevelPoints={setLevelPoints}
+              state={currentState}
             />
-
-            {(userPosition)
-              ? <div>
-                {(points === 10)
-                  ? <p>Aí tu veio!!! 👏</p>
-                  : (points === 5)
-                    ? <p>Foi perto! 👍</p>
-                    : (points === 1)
-                      ? <p>Quase. 🤔</p>
-                      : <p>Se passou 🤦‍♀️</p>
-                }
-                {(currentIndex !== citiesList.length - 1)
-                  ? <button onClick={() => {
-                      setCurrentCity(citiesList[currentIndex + 1]);
-                      setCurrentIndex(currentIndex + 1)
-                      setPoints(0);
-                      setUserPosition(null);
-                    }}>
-                      Próxima
-                    </button>
-                  : (round !== 8)
-                    ? <button onClick={() => {
-                        setRound(round + 1);
-                        setPoints(0);
-                        setRoundPoints(0);
-                        setStateSelect(round > 1);
-                        setLoading(true);
-                      }}>
-                        Próxima fase
-                      </button>
-                    : <>
-                      <p>Você fez {totalPoints} pontos!</p>
-                      <button onClick={()=>setPage("main")}>Voltar</button>
-                    </>
-                }
-              </div>
-              : null
-            }
-          </>
-          : <>
-            <p>Selecione o estado para esta rodada:</p>
-            {nextStates.map(state => (
-              <button onClick={() => {
-                setCurrentState(state.id);
-                setStateSelect(false);
-                setLoading(true);
-                setNextStates(nextStates.filter(item => item.id !== state.id))
-              }}>
-                {state.name}
-              </button>
-            ))}
-          </>
-        }
-      </>
+            : screen === "posLevel"
+              ? <PosLevel
+                gameLevel={gameLevel}
+                cityLevel={cityLevel}
+                setGameLevel={setGameLevel}
+                setCityLevel={setCityLevel}
+                setScreen={setScreen}
+                setLoading={setLoading}
+                levelPoints={levelPoints}
+                setLevelPoints={setLevelPoints}
+                totalPoints={totalPoints}
+                setTotalPoints={setTotalPoints}
+              />
+              : screen === "endGame"
+                ? <EndGame
+                  points={totalPoints}
+                  setPage={setPage}
+                />
+                : null
     }
-
-
   </>;
 }
 

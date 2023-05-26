@@ -6,6 +6,11 @@ import Instructions from './pages/instructions/main';
 import GamePlay from './pages/gameplay/main';
 
 const App = () => {
+  /** Páginas (page):
+   * "main": página inicial
+   * "instructions": instruções do jogo (como jogar)
+   * "gameplay": jogando o jogo
+   */
   const [page, setPage] = useState("main");
 
   return (
@@ -30,11 +35,7 @@ const App = () => {
 
       <footer>
         <p>
-          Geogame v0.2.0
-        </p>
-        <p>
-          Desenvolvido por Eduardo Nery <br />
-          eduardognery@gmail.com
+          {(new Date()).getFullYear()} Geogame v0.2.0 - Desenvolvido por Eduardo Nery - eduardognery@gmail.com
         </p>
       </footer>
     </div>

@@ -21,13 +21,16 @@ const regions = [
     "id": 4,
     "name": "Sudeste",
     "latitude": -20.7627,
-    "longitude": -42.8845
+    "longitude": -42.8845,
   },
   {
     "id": 5,
     "name": "Sul",
     "latitude": -28.3788,
-    "longitude": -52.4296
+    "longitude": -52.4296,
+    "zoom": 5,
+    "width": 350,
+    "height": 350,
   },
 ];
 
