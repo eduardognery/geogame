@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/geogame/static/css/main.8fdd7389.css",
-    "main.js": "/geogame/static/js/main.24e04990.js",
+    "main.css": "/geogame/static/css/main.c61412d5.css",
+    "main.js": "/geogame/static/js/main.0bba7459.js",
     "index.html": "/geogame/index.html",
-    "main.8fdd7389.css.map": "/geogame/static/css/main.8fdd7389.css.map",
-    "main.24e04990.js.map": "/geogame/static/js/main.24e04990.js.map"
+    "main.c61412d5.css.map": "/geogame/static/css/main.c61412d5.css.map",
+    "main.0bba7459.js.map": "/geogame/static/js/main.0bba7459.js.map"
   },
   "entrypoints": [
-    "static/css/main.8fdd7389.css",
-    "static/js/main.24e04990.js"
+    "static/css/main.c61412d5.css",
+    "static/js/main.0bba7459.js"
   ]
 }
